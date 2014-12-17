@@ -1,10 +1,31 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2014 Leonardo Kewitz
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
 #include "matrix.h"
-
-#define EPSILON 1E-16
 
 inline void assert(int test, char* msg) {
     if (!test) {
@@ -80,20 +101,45 @@ void LUCroutInplaceDecompose(int n, double* A) {
     }
 }
 
-double GaussPivot(int line, int n, double* A, double *b) {
+void LUSubstitute(int n, double* LU, double* x, double* b) {
+    int i, j;
+    double w, s, pivot, _eps = 1E-16;
+
+    for (i = 0; i < n; i++) {
+        w = x[i];
+        for (j = 0; j < i; j++) {
+            w -= LU[i*n + j] * x[j];
+        }
+        pivot = LU[i*n + i];
+        assert(fabs(w) > _eps, "Matriz singular.");
+        w /= pivot;
+        x[i] = w;
+    }
+
+    for (i = n - 1; i >= 0; i--) {
+        s = x[i];
+        for (j = i+1; j < n; j++) {
+            s -=  LU[i*n + j] * x[j];
+        }
+        x[i] = s;
+    }
+    return;
+}
+
+double GaussPivot(int col, int n, double* A, double *b) {
     int i, j, k, iswap = 0;
 
     double temp, max = 0.0;
-    for (i = line; i < n; i ++) {
-        temp = abs(A[i*n + line]);
+    for (i = col; i < n; i ++) {
+        temp = abs(A[i*n + col]);
         if (temp > max) {
             max = temp;
             iswap = i;
         }
     }
-    if (iswap > line) {
-        SwapMLine(n, line, iswap, A);
-        SwapVLine(line, iswap, b);
+    if (iswap > col) {
+        SwapMLine(n, col, iswap, A);
+        SwapVLine(col, iswap, b);
     }
 
     return A[line*n + line];
@@ -101,25 +147,24 @@ double GaussPivot(int line, int n, double* A, double *b) {
 
 void GaussJordan(int n, double* A, double* x, double* b) {
     int i, j, k;
-    double pivot, w;
+    double pivot, w, _eps = 1E-16;
 
     // Triangula.
-    for (i = 0; i < n-1; i++) {
-        pivot = GaussPivot(i, n, A, b);
-        //assert(abs(pivot) > EPSILON, "Matriz singular.");
-
-        for (j = i+1; j < n; j++) {
-            w = A[j*n + i] / pivot;
-            for (k = i+1; k < n; k++) {
-                A[j*n + k] -= w * A[i*n + k];
+    for (j = 0; j < n-1; j++) {
+        pivot = GaussPivot(j, n, A, b);
+        assert(fabs(pivot) > _eps, "Matriz singular.");
+        for (i = j+1; i < n; i++) {
+            w = A[i*n + j] / pivot;
+            for (k = j+1; k < n; k++) {
+                A[i*n + k] -= w * A[j*n + k];
             }
-            b[j] -= w * b[i];
+            b[i] -= w * b[j];
         }
     }
 
     // Retrosubstituição
     for (i = n-1; i >= 0; i--) {
-        //assert(abs(pivot) > EPSILON, "Matriz singular.");
+        assert(fabs(pivot) > _eps, "Matriz singular.");
         x[i] = b[i];
         for (j = i+1; j < n; j++) {
             x[i] -= A[i*n + j] * x[j];
