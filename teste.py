@@ -27,36 +27,43 @@ __version__ = "0.1.00"
 __author__ = "kewitz"
 __license__ = "MIT"
 
-from ctypes import *
 from numpy import *
+import unittest
 import matrixlib as ml
-
-A = matrix([[10., -1., 2., 0.],
-              [-1., 11., -1., 3.],
-              [2., -1., 10., -1.],
-              [0.0, 3., -1., 8.]])
-b = array([6., 25., -11., 15.])
+import numpy.testing
 
 
-def testaLU(A, b):
-    L, U = ml.LUCroutDecompose(A)
-    A2 = L.dot(U)
-    e = abs(A - A2)
-    print "A\n", A
-    print "L\n", L
-    print "U\n", U
-    print "LU\n", A2
-    print "A - LU\n", e
-    LU = ml.LUCroutInplaceDecompose(A)
-    print LU
-    x = ml.LUSolve(LU, b)
-    print x
+def getAB():
+    A = matrix([[10., -1., 2., 0.],
+                [-1., 11., -1., 3.],
+                [2., -1., 10., -1.],
+                [0.0, 3., -1., 8.]])
+    b = array([6., 25., -11., 15.])
+    return A, b
 
 
-def testaGaussJordan(A, b):
-    x = ml.GaussJordan(A, b)
-    print x
+class LUTest(unittest.TestCase):
+    def setUp(self):
+        self.A, self.b = getAB()
+
+    def testLUeA(self):
+        L, U = ml.LUCroutDecompose(self.A)
+        A2 = L.dot(U)
+        numpy.testing.assert_almost_equal(self.A, A2)
+
+    def testSolver(self):
+        LU = ml.LUCroutInplaceDecompose(self.A)
+        x = ml.LUSolve(LU, self.b)
+        numpy.testing.assert_almost_equal(x, [1., 2., -1., 1.])
 
 
-testaLU(A, b)
-testaGaussJordan(A, b)
+class GaussJordanTest(unittest.TestCase):
+    def setUp(self):
+        self.A, self.b = getAB()
+
+    def test(self):
+        x = ml.GaussJordan(self.A, self.b)
+        numpy.testing.assert_almost_equal(x, [1., 2., -1., 1.])
+
+if __name__ == "__main__":
+    unittest.main()

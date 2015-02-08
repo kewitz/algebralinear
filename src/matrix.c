@@ -142,7 +142,7 @@ double GaussPivot(int col, int n, double* A, double *b) {
         SwapVLine(col, iswap, b);
     }
 
-    return A[line*n + line];
+    return A[iswap*n + iswap];
 }
 
 void GaussJordan(int n, double* A, double* x, double* b) {
