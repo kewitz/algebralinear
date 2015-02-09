@@ -173,3 +173,32 @@ void GaussJordan(int n, double* A, double* x, double* b) {
     }
     return;
 }
+
+void Jacobi(int n, int ks, double* A, double* x, double* b) {
+    int i, j, k;
+    double w, pivot, _alpha = 1E-8, _eps = 1E-16;
+    double *xnext;
+
+    xnext = malloc(n*sizeof(double));
+
+    for (k = 0; k < ks; k++) {
+        for (i = 0; i < n; i++) {
+            pivot = A[i*n + i];
+            w = b[i];
+            assert(fabs(pivot) > _eps, "Matriz singular.");
+
+            for (j=0; j < i; j++) {
+                w -= A[i*n + j] * x[j];
+            }
+            for (j=i+1; j < n; j++) {
+                w -= A[i*n + j] * x[j];
+            }
+
+            xnext[i] = w/pivot;
+        }
+
+        for (i = 0; i < n; i++) {
+            x[i] = xnext[i];
+        }
+    }
+}

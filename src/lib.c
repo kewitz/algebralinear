@@ -1,4 +1,4 @@
-/* 
+/*
  * The MIT License (MIT)
  *
  * Copyright (c) 2014 Leonardo Kewitz
@@ -42,5 +42,10 @@ extern void LUSolve(int n, double* LU, double* x, double* b) {
 
 extern void SolveGJ(int n, double* A, double* x, double* b) {
     GaussJordan(n, A, x, b);
+    return;
+}
+
+extern void SolveJacobi(int n, int ks, double* A, double* x, double* b) {
+    Jacobi(n, ks, A, x, b);
     return;
 }

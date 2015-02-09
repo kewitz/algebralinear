@@ -65,5 +65,14 @@ class GaussJordanTest(unittest.TestCase):
         x = ml.GaussJordan(self.A, self.b)
         numpy.testing.assert_almost_equal(x, [1., 2., -1., 1.])
 
+
+class JacobiTest(unittest.TestCase):
+    def setUp(self):
+        self.A, self.b = getAB()
+
+    def test(self):
+        x = ml.Jacobi(self.A, self.b, 100)
+        numpy.testing.assert_almost_equal(x, [1., 2., -1., 1.])
+
 if __name__ == "__main__":
     unittest.main()

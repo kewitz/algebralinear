@@ -88,3 +88,19 @@ def GaussJordan(A, b):
     except e:
         raise e
     return x
+
+def Jacobi(A, b, ks=1000):
+    """
+    Resolve Ax = b através do método iterativo de Jacobi.
+    """
+    assert A.shape[0] == A.shape[1] and type(A) is matrix, "'A' deve ser NxN."
+    assert b.shape[0] == A.shape[0], "'b' deve ser compatível com A."
+    n = A.shape[0]
+    x = zeros(n)
+    try:
+        lib.SolveJacobi(n, ks, byref(ctypeslib.as_ctypes(A)),
+                    byref(ctypeslib.as_ctypes(x)),
+                    byref(ctypeslib.as_ctypes(b)))
+    except e:
+        raise e
+    return x
