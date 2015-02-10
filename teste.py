@@ -71,7 +71,16 @@ class JacobiTest(unittest.TestCase):
         self.A, self.b = getAB()
 
     def test(self):
-        x = ml.Jacobi(self.A, self.b, 100)
+        x = ml.Jacobi(self.A, self.b, 20)
+        numpy.testing.assert_almost_equal(x, [1., 2., -1., 1.])
+
+
+class GaussSeidelTest(unittest.TestCase):
+    def setUp(self):
+        self.A, self.b = getAB()
+
+    def test(self):
+        x = ml.GaussSeidel(self.A, self.b, 10)
         numpy.testing.assert_almost_equal(x, [1., 2., -1., 1.])
 
 if __name__ == "__main__":

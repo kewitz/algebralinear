@@ -49,3 +49,8 @@ extern void SolveJacobi(int n, int ks, double* A, double* x, double* b) {
     Jacobi(n, ks, A, x, b);
     return;
 }
+
+extern void SolveGaussSeidel(int n, int ks, double* A, double* x, double* b) {
+    GaussSeidel(n, ks, A, x, b);
+    return;
+}

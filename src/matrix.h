@@ -34,4 +34,5 @@ double GaussPivot(int, int, double*, double*);
 void GaussJordan(int, double*, double*, double*);
 
 void Jacobi(int, int, double*, double*, double*);
+void GaussSeidel(int, int, double*, double*, double*);
 #endif
