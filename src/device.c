@@ -22,42 +22,43 @@
  * SOFTWARE.
  *
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
 
-#include "matrix.h"
+#include <cuda.h>
+#include <cuda_runtime.h>
 #include "device.h"
 
-extern void LUDec(int n, double* A, double* L, double* U) {
-    LUCroutDecompose(n , A, L, U);
-    return;
-}
-extern void LUInDec(int n, double* A) {
-    LUCroutInplaceDecompose(n, A);
-    return;
-}
-extern void LUSolve(int n, double* LU, double* x, double* b) {
-    LUSubstitute(n, LU, x, b);
-    return;
+//  Utils
+int getCUDAdevices() {
+    int deviceCount = 0;
+    cudaError_t error_id = cudaGetDeviceCount(&deviceCount);
+    return deviceCount;
 }
 
-extern void SolveGJ(int n, double* A, double* x, double* b) {
-    GaussJordan(n, A, x, b);
-    return;
-}
+void Jacobi(int n, int ks, double* A, double* x, double* b) {
+    int i, j, k;
+    double w, pivot, _alpha = 1E-8, _eps = 1E-16;
+    double *xnext;
 
-extern void SolveJacobi(int n, int ks, double* A, double* x, double* b) {
-    Jacobi(n, ks, A, x, b);
-    return;
-}
+    xnext = malloc(n*sizeof(double));
 
-extern void SolveGaussSeidel(int n, int ks, double* A, double* x, double* b) {
-    GaussSeidel(n, ks, A, x, b);
-    return;
-}
+    for (k = 0; k < ks; k++) {
+        for (i = 0; i < n; i++) {
+            pivot = A[i*n + i];
+            w = b[i];
+            assert(fabs(pivot) > _eps, "Matriz singular.");
 
-extern int GetCUDADevices() {
-    return getCUDAdevices();
+            for (j=0; j < i; j++) {
+                w -= A[i*n + j] * x[j];
+            }
+            for (j=i+1; j < n; j++) {
+                w -= A[i*n + j] * x[j];
+            }
+
+            xnext[i] = w/pivot;
+        }
+
+        for (i = 0; i < n; i++) {
+            x[i] = xnext[i];
+        }
+    }
 }

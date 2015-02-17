@@ -22,42 +22,11 @@
  * SOFTWARE.
  *
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
 
-#include "matrix.h"
-#include "device.h"
+#ifdef __DEVICE
+#define __DEVICE
 
-extern void LUDec(int n, double* A, double* L, double* U) {
-    LUCroutDecompose(n , A, L, U);
-    return;
-}
-extern void LUInDec(int n, double* A) {
-    LUCroutInplaceDecompose(n, A);
-    return;
-}
-extern void LUSolve(int n, double* LU, double* x, double* b) {
-    LUSubstitute(n, LU, x, b);
-    return;
-}
+// Utils
+int getCUDAdevices();
 
-extern void SolveGJ(int n, double* A, double* x, double* b) {
-    GaussJordan(n, A, x, b);
-    return;
-}
-
-extern void SolveJacobi(int n, int ks, double* A, double* x, double* b) {
-    Jacobi(n, ks, A, x, b);
-    return;
-}
-
-extern void SolveGaussSeidel(int n, int ks, double* A, double* x, double* b) {
-    GaussSeidel(n, ks, A, x, b);
-    return;
-}
-
-extern int GetCUDADevices() {
-    return getCUDAdevices();
-}
+#endif

@@ -6,10 +6,12 @@ CC	= nvcc
 all: lib
 
 test: matrix.o
-	$(CC) -Xcompiler -fpic test.c matrix.o -lm -g -o test
+	$(CC) -Xcompiler -fPIC test.c matrix.o -lm -g -o test
+
+rebuild: clean all
 
 clean:
 	rm *.o *.so
 
-lib: lib.c matrix.o
-	$(CC) -Xcompiler -fpic -g -shared lib.c matrix.o -lm -g -o lib.so
+lib: lib.c matrix.o device.o
+	$(CC) -Xcompiler -fpic -g -shared lib.c device.o matrix.o -lm -g -o lib.so

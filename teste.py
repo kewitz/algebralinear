@@ -27,10 +27,9 @@ __version__ = "0.1.00"
 __author__ = "kewitz"
 __license__ = "MIT"
 
-from numpy import *
+from numpy import matrix, array, testing
 import unittest
 import matrixlib as ml
-import numpy.testing
 
 
 def getAB():
@@ -49,12 +48,12 @@ class LUTest(unittest.TestCase):
     def testLUeA(self):
         L, U = ml.LUCroutDecompose(self.A)
         A2 = L.dot(U)
-        numpy.testing.assert_almost_equal(self.A, A2)
+        testing.assert_almost_equal(self.A, A2)
 
     def testSolver(self):
         LU = ml.LUCroutInplaceDecompose(self.A)
         x = ml.LUSolve(LU, self.b)
-        numpy.testing.assert_almost_equal(x, [1., 2., -1., 1.])
+        testing.assert_almost_equal(x, [1., 2., -1., 1.])
 
 
 class GaussJordanTest(unittest.TestCase):
@@ -63,7 +62,7 @@ class GaussJordanTest(unittest.TestCase):
 
     def test(self):
         x = ml.GaussJordan(self.A, self.b)
-        numpy.testing.assert_almost_equal(x, [1., 2., -1., 1.])
+        testing.assert_almost_equal(x, [1., 2., -1., 1.])
 
 
 class JacobiTest(unittest.TestCase):
@@ -72,7 +71,7 @@ class JacobiTest(unittest.TestCase):
 
     def test(self):
         x = ml.Jacobi(self.A, self.b, 20)
-        numpy.testing.assert_almost_equal(x, [1., 2., -1., 1.])
+        testing.assert_almost_equal(x, [1., 2., -1., 1.])
 
 
 class GaussSeidelTest(unittest.TestCase):
@@ -81,7 +80,8 @@ class GaussSeidelTest(unittest.TestCase):
 
     def test(self):
         x = ml.GaussSeidel(self.A, self.b, 10)
-        numpy.testing.assert_almost_equal(x, [1., 2., -1., 1.])
+        testing.assert_almost_equal(x, [1., 2., -1., 1.])
 
 if __name__ == "__main__":
+    print ml.CUDAdevices, ml.CUDAcapable
     unittest.main()
