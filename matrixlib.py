@@ -25,17 +25,27 @@ SOFTWARE.
 __version__ = "0.1.00"
 __author__ = "kewitz"
 __license__ = "MIT"
+DEBUG = True
 
 from ctypes import cdll, byref
-from numpy import zeros, matrix, array, ctypeslib
+from numpy import zeros, matrix, ctypeslib
+
+
+def debug(s, pref="%"):
+    if DEBUG:
+        print "[%s] %s" % (pref, s)
 
 try:
     lib = cdll.LoadLibrary('./src/lib.so')
 except:
     raise
+finally:
+    CUDAdevices = lib.GetCUDADevices()
+    CUDAcapable = CUDAdevices >= 1
+    if CUDAcapable:
+        debug("Hardware compatível com CUDA detectado.")
+        kernels = cdll.LoadLibrary('./src/kernels.so')
 
-CUDAdevices = lib.GetCUDADevices()
-CUDAcapable = CUDAdevices > 1
 
 def LUCroutDecompose(A):
     """
@@ -50,6 +60,7 @@ def LUCroutDecompose(A):
               byref(ctypeslib.as_ctypes(U)))
     return L, U
 
+
 def LUCroutInplaceDecompose(A):
     """
     Implementação do método de Crout para decomposição LU sobrescrevendo a
@@ -60,6 +71,7 @@ def LUCroutInplaceDecompose(A):
     n = A.shape[0]
     lib.LUInDec(n, byref(ctypeslib.as_ctypes(LU)))
     return LU
+
 
 def LUSolve(LU, b):
     """
@@ -72,9 +84,11 @@ def LUSolve(LU, b):
                 byref(ctypeslib.as_ctypes(b)))
     return x
 
+
 def GaussJordan(A, b):
     """
-    Resolve Ax = b através do método de eliminação de Gauss-Jordan com pivotação.
+    Resolve Ax = b através do método de eliminação de Gauss-Jordan com
+    pivotação.
     """
     assert A.shape[0] == A.shape[1] and type(A) is matrix, "'A' deve ser NxN."
     assert b.shape[0] == A.shape[0], "'b' deve ser compatível com A."
@@ -84,11 +98,12 @@ def GaussJordan(A, b):
         lib.SolveGJ(n, byref(ctypeslib.as_ctypes(A)),
                     byref(ctypeslib.as_ctypes(x)),
                     byref(ctypeslib.as_ctypes(b)))
-    except e:
-        raise e
+    except:
+        raise
     return x
 
-def Jacobi(A, b, ks=1000):
+
+def Jacobi(A, b, ks=1000, cuda=CUDAcapable):
     """
     Resolve Ax = b através do método iterativo de Jacobi.
     """
@@ -96,13 +111,15 @@ def Jacobi(A, b, ks=1000):
     assert b.shape[0] == A.shape[0], "'b' deve ser compatível com A."
     n = A.shape[0]
     x = zeros(n)
+    func = kernels.CUJacobi if cuda else lib.SolveJacobi
     try:
-        lib.SolveJacobi(n, ks, byref(ctypeslib.as_ctypes(A)),
-                    byref(ctypeslib.as_ctypes(x)),
-                    byref(ctypeslib.as_ctypes(b)))
-    except e:
-        raise e
+        func(n, ks, byref(ctypeslib.as_ctypes(A)),
+             byref(ctypeslib.as_ctypes(x)),
+             byref(ctypeslib.as_ctypes(b)))
+    except:
+        raise
     return x
+
 
 def GaussSeidel(A, b, ks=50):
     """
@@ -114,8 +131,8 @@ def GaussSeidel(A, b, ks=50):
     x = zeros(n)
     try:
         lib.SolveGaussSeidel(n, ks, byref(ctypeslib.as_ctypes(A)),
-                    byref(ctypeslib.as_ctypes(x)),
-                    byref(ctypeslib.as_ctypes(b)))
-    except e:
-        raise e
+                             byref(ctypeslib.as_ctypes(x)),
+                             byref(ctypeslib.as_ctypes(b)))
+    except:
+        raise
     return x

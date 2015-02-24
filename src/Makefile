@@ -1,17 +1,20 @@
 CC	= nvcc
+gen = -gencode arch=compute_30,code=sm_30
+flags = -Xcompiler -fPIC -g
+#flags = -Xcompiler -fPIC -g -m 64
+
+all: lib kernels.so
 
 %.o: %.c
-	$(CC) -Xcompiler -fpic -g -c -o $@ $<
+	$(CC) $(flags) -c -o $@ $< $(gen)
 
-all: lib
-
-test: matrix.o
-	$(CC) -Xcompiler -fPIC test.c matrix.o -lm -g -o test
+kernels.so:
+	$(CC) $(flags) -shared kernels.cu -lm -g -o kernels.so -lcuda $(gen)
 
 rebuild: clean all
 
 clean:
 	rm *.o *.so
 
-lib: lib.c matrix.o device.o
-	$(CC) -Xcompiler -fpic -g -shared lib.c device.o matrix.o -lm -g -o lib.so
+lib: matrix.o device.o
+	$(CC) $(flags) -shared lib.c *.o -lm -g -o lib.so -lcuda $(gen)

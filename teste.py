@@ -83,5 +83,4 @@ class GaussSeidelTest(unittest.TestCase):
         testing.assert_almost_equal(x, [1., 2., -1., 1.])
 
 if __name__ == "__main__":
-    print ml.CUDAdevices, ml.CUDAcapable
     unittest.main()
